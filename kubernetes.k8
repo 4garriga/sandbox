@@ -1,0 +1,45 @@
+https://github.com/jupyter/docker-stacks/tree/master/examples/openshift
+https://jupyterhub-jupyterhub.apps.us-east-1.starter.openshift-online.com/
+# New Project 
+
+# Create Templates 
+oc create -f https://raw.githubusercontent.com/jupyter-on-openshift/docker-stacks/master/examples/openshift/templates.json
+
+# new-app 
+oc new-app --template jupyter-notebook --param APPLICATION_NAME=jupyterhub --param NOTEBOOK_IMAGE=jupyter/scipy-notebook:latest
+# note password in output, copy NOTEBOOK_PASSWORD=6aeb2c34a05ceae2478b33b78e8d067e
+
+# enable jupyterlab interface
+$ oc set env dc/jupyterhub JUPYTER_ENABLE_LAB=true
+
+# persistent storage 
+oc set volume dc/jupyterhub --add --type=pvc --claim-size=1Gi --claim-mode=ReadWriteOnce --claim-name mynotebook-data --name data --mount-path /home/jovyan
+
+# create jupyter_notebook_config.py in /home/jovyan/.jupyter/jupyter_notebook_config.py
+
+
+## Other 
+# run command in container 
+$ oc rsh <minimal-notebook-7-6dwp8> <jupyter notebook list>
+
+# scale down 
+oc scale dc/jupyterhub --replicas 0
+
+# scale up
+oc scale dc/jupyterhub --replicas 1
+
+# change password
+$ oc set env dc/mynotebook JUPYTER_NOTEBOOK_PASSWORD=f18fst
+
+# eidt config
+$ oc edit configmap/jupyterhub-cfg
+
+
+# cull idle notebook instances 
+c.JupyterHub.services = [
+    {
+        'name': 'cull-idle',
+        'admin': True,
+        'command': ['cull-idle-servers', '--timeout=300'],
+    }
+]
