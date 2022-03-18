@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            input {
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+    <main>
+        <input id="file" type="file"/>
+        <span id="progress"></span>
+    </main>
+    <script>
+        let fileInput = document.getElementById("file");
+        let progress = document.getElementById("progress");
+        let reader = new FileReader();
+        let decoder = new TextDecoder('UTF-8');
+        var pct = 0;
+
+        reader.addEventListener('loadstart', e => {
+            progress.innerText = `Parsing ${e.total} Bytes`
+        });
+        reader.addEventListener('progress', e => {
+            pct = e.loaded * 100 / e.total
+            progress.innerText = `${pct.toFixed(2)}%`;
+        });
+        reader.addEventListener('loadend', e => {
+            var fileString = decoder.decode(e.target.result);
+            var lines = fileString.split('\r|\n');
+            var data = {};
+            for (const [idx, line] of lines.entries()) {
+                var [coeff, code] = line.split('\s+|\t');
+            }
+        });
+        reader.addEventListener('error', e => {
+            progress.innerText = 'Failed!';
+        })
+
+        function arrayBufferToString(buffer) {
+            return String.fromCharCode.apply(null, new Uint16Array(buff));
+        }
+
+        function parseFile () {
+            var selectedFile = fileInput.files[0]
+            if (selectedFile) {
+                reader.readAsArrayBuffer(selectedFile);
+            }
+        }
+        
+        fileInput.addEventListener('change', parseFile);
+
+    </script>
+    </body>
+</html>
